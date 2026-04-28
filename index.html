@@ -672,6 +672,57 @@
         .content { padding: 40px 56px 56px; max-width: none; }
       }
     }
+
+    /* ── Period tabs ───────────────────────────────────────────────── */
+    .period-tabs { display: flex; background: var(--surface-2); border-radius: 10px; padding: 3px; margin-bottom: 20px; gap: 2px; }
+    .period-tab { flex: 1; padding: 8px 4px; border: none; background: none; font-family: var(--font); font-size: 13px; font-weight: 500; color: var(--text-muted); border-radius: 8px; cursor: pointer; transition: all .15s; }
+    .period-tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); font-weight: 600; }
+
+    /* ── Stat cards ────────────────────────────────────────────────── */
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 16px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px 14px; box-shadow: var(--shadow-sm); }
+    .stat-val { font-size: 28px; font-weight: 700; letter-spacing: -1px; line-height: 1.1; }
+    .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-top: 3px; }
+
+    /* ── Type stat rows ────────────────────────────────────────────── */
+    .type-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 13px 14px; margin-bottom: 8px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 12px; }
+    .type-stat-info { flex: 1; min-width: 0; }
+    .type-stat-name { font-size: 14px; font-weight: 600; }
+    .type-stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .type-stat-count { font-size: 22px; font-weight: 700; flex-shrink: 0; }
+    .type-stat.cycling .type-stat-count { color: var(--sage); }
+    .type-stat.weights .type-stat-count { color: var(--accent); }
+    .type-stat.gym     .type-stat-count { color: var(--indigo); }
+    .type-stat.other   .type-stat-count { color: var(--amber); }
+
+    /* ── Chart card ────────────────────────────────────────────────── */
+    .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; margin-bottom: 10px; box-shadow: var(--shadow-sm); }
+    .chart-card-title { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-subtle); margin-bottom: 14px; }
+
+    /* ── Streak ────────────────────────────────────────────────────── */
+    .streak-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 10px; }
+    .streak-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 20px 14px; box-shadow: var(--shadow-sm); text-align: center; }
+    .streak-val { font-size: 38px; font-weight: 700; letter-spacing: -2px; color: var(--accent); line-height: 1; }
+    .streak-unit { font-size: 12px; color: var(--text-subtle); margin-top: 2px; }
+    .streak-label { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-top: 6px; }
+
+    /* ── Exercise ranking ──────────────────────────────────────────── */
+    .ex-rank-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .ex-rank-item:last-child { border-bottom: none; }
+    .ex-rank-n { width: 18px; font-size: 11px; font-weight: 700; color: var(--text-subtle); text-align: right; flex-shrink: 0; }
+    .ex-rank-name { font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; width: 110px; }
+    .ex-rank-bar { flex: 1; height: 5px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+    .ex-rank-fill { height: 100%; background: var(--accent); border-radius: 3px; }
+    .ex-rank-cnt { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+
+    /* ── Legend ────────────────────────────────────────────────────── */
+    .type-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 12px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-muted); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .legend-dot.cycling { background: var(--sage); }
+    .legend-dot.weights { background: var(--accent); }
+    .legend-dot.gym     { background: var(--indigo); }
+    .legend-dot.other   { background: var(--amber); }
   </style>
 </head>
 <body>
@@ -814,6 +865,474 @@
       <path d="M3 3v6h6M21 12A9 9 0 0 0 6 5.3L3 8M12 7v5l4 2"/>
     </svg>
   );
+
+  const IReview = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="3"/>
+      <path d="M16 2v4M8 2v4M3 10h18"/>
+      <path d="M8 15h2M14 15h2M8 19h2M14 19h2" strokeWidth="2.5"/>
+    </svg>
+  );
+
+  const IBarChart = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="3" y1="21" x2="21" y2="21"/>
+      <rect x="4" y="13" width="4" height="8" rx="1"/>
+      <rect x="10" y="7" width="4" height="14" rx="1"/>
+      <rect x="16" y="3" width="4" height="18" rx="1"/>
+    </svg>
+  );
+
+  /* ── SVG color constants (CSS vars don't work in SVG fill attr) ── */
+  const SC = {
+    cycling: 'oklch(56% 0.13 162)',
+    weights: 'oklch(62% 0.19 28)',
+    gym:     'oklch(54% 0.17 272)',
+    other:   'oklch(68% 0.16 76)',
+    bg2:     'oklch(93% 0.007 58)',
+    border:  'oklch(90% 0.006 58)',
+    muted:   'oklch(70% 0.008 55)',
+  };
+
+  /* ── Date helpers ────────────────────────────────────────────────── */
+  const localDateStr = (d) =>
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+  const getWeekMonday = (dateStr) => {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
+    const dow = dt.getDay();
+    dt.setDate(dt.getDate() - (dow === 0 ? 6 : dow - 1));
+    return localDateStr(dt);
+  };
+
+  /* ── WeekCalendar ────────────────────────────────────────────────── */
+  function WeekCalendar({ startDate, endDate, dateMap }) {
+    const days = [];
+    const cur = new Date(startDate);
+    const today = localDateStr(new Date());
+    while (cur <= endDate) { days.push(new Date(cur)); cur.setDate(cur.getDate() + 1); }
+    const DAY = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const TYPE_C = { cycling: 'var(--sage)', weights: 'var(--accent)', gym: 'var(--indigo)', other: 'var(--amber)' };
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 5 }}>
+        {days.map(day => {
+          const ds = localDateStr(day);
+          const types = dateMap[ds] || [];
+          const isToday = ds === today;
+          return (
+            <div key={ds} style={{
+              background: types.length ? 'var(--surface-2)' : 'var(--surface)',
+              border: isToday ? '2px solid var(--accent)' : '1px solid var(--border)',
+              borderRadius: 10, padding: '8px 3px 7px', textAlign: 'center',
+            }}>
+              <div style={{ fontSize: 9, color: 'var(--text-subtle)', fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase', marginBottom: 3 }}>
+                {DAY[day.getDay()]}
+              </div>
+              <div style={{ fontSize: 15, fontWeight: isToday ? 700 : 500, marginBottom: 5, color: isToday ? 'var(--accent)' : 'var(--text)' }}>
+                {day.getDate()}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 2, minHeight: 8 }}>
+                {types.map(t => <div key={t} style={{ width: 6, height: 6, borderRadius: '50%', background: TYPE_C[t] }} />)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  /* ── MonthCalendar ───────────────────────────────────────────────── */
+  function MonthCalendar({ year, month, dateMap }) {
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDow = new Date(year, month, 1).getDay();
+    const startPad = firstDow === 0 ? 6 : firstDow - 1;
+    const today = localDateStr(new Date());
+    const TYPE_C = { cycling: 'var(--sage)', weights: 'var(--accent)', gym: 'var(--indigo)', other: 'var(--amber)' };
+    const cells = [];
+    for (let i = 0; i < startPad; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) {
+      const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      cells.push({ d, ds, types: dateMap[ds] || [], isToday: ds === today });
+    }
+    while (cells.length % 7 !== 0) cells.push(null);
+    return (
+      <div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3, marginBottom: 3 }}>
+          {['M','T','W','T','F','S','S'].map((l, i) => (
+            <div key={i} style={{ textAlign: 'center', fontSize: 9, fontWeight: 700, color: 'var(--text-subtle)', letterSpacing: '.05em', textTransform: 'uppercase', padding: '3px 0' }}>{l}</div>
+          ))}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 }}>
+          {cells.map((cell, i) => !cell ? <div key={i} style={{ aspectRatio: '1' }} /> : (
+            <div key={i} style={{
+              aspectRatio: '1', borderRadius: 7, display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', padding: 2,
+              background: cell.types.length ? 'var(--surface-2)' : 'var(--surface)',
+              border: cell.isToday ? '2px solid var(--accent)' : '1px solid var(--border)',
+            }}>
+              <span style={{ fontSize: 12, fontWeight: cell.isToday ? 700 : 500, lineHeight: 1, color: cell.isToday ? 'var(--accent)' : 'var(--text)' }}>{cell.d}</span>
+              <div style={{ display: 'flex', gap: 1.5, marginTop: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
+                {cell.types.slice(0, 3).map(t => <div key={t} style={{ width: 4, height: 4, borderRadius: '50%', background: TYPE_C[t] }} />)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  /* ── YearHeatmap ─────────────────────────────────────────────────── */
+  function YearHeatmap({ year, dateMap }) {
+    const jan1 = new Date(year, 0, 1);
+    const dec31 = new Date(year, 11, 31);
+    const daysBack = (jan1.getDay() === 0 ? 6 : jan1.getDay() - 1);
+    const gridStart = new Date(jan1); gridStart.setDate(jan1.getDate() - daysBack);
+    const CELL = 11, GAP = 2, STEP = CELL + GAP;
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const weeks = [];
+    const cur = new Date(gridStart);
+    while (cur <= dec31) {
+      const week = [];
+      for (let r = 0; r < 7; r++) {
+        const ds = localDateStr(cur);
+        week.push({ ds, types: dateMap[ds] || [], inYear: cur.getFullYear() === year, isFirst: cur.getDate() === 1 && cur.getFullYear() === year, month: cur.getMonth() });
+        cur.setDate(cur.getDate() + 1);
+      }
+      weeks.push(week);
+    }
+    const monthLabels = [];
+    weeks.forEach((wk, wi) => {
+      wk.forEach(day => {
+        if (day.isFirst && !monthLabels.find(ml => ml.m === day.month)) monthLabels.push({ m: day.month, x: 18 + wi * STEP });
+      });
+    });
+    const getColor = (types, inYear) => {
+      if (!inYear) return 'none';
+      if (!types.length) return SC.bg2;
+      if (types.length > 1) return 'oklch(72% 0.04 55)';
+      return SC[types[0]] || SC.bg2;
+    };
+    const SVG_W = weeks.length * STEP + 18;
+    const SVG_H = 7 * STEP + 16;
+    return (
+      <div style={{ overflowX: 'auto', paddingBottom: 4 }}>
+        <svg width={SVG_W} height={SVG_H} viewBox={`0 0 ${SVG_W} ${SVG_H}`} style={{ display: 'block' }}>
+          {monthLabels.map(ml => <text key={ml.m} x={ml.x} y={9} fontSize={8} fill={SC.muted}>{MONTHS[ml.m]}</text>)}
+          {[{r:0,l:'M'},{r:2,l:'W'},{r:4,l:'F'}].map(({r,l}) => (
+            <text key={l} x={0} y={14 + r * STEP + STEP * 0.75} fontSize={8} fill={SC.muted}>{l}</text>
+          ))}
+          {weeks.map((wk, wi) => wk.map((day, ri) => (
+            <rect key={`${wi}-${ri}`}
+              x={18 + wi * STEP} y={14 + ri * STEP}
+              width={CELL} height={CELL} rx={2}
+              fill={getColor(day.types, day.inYear)}
+              stroke={day.inYear && !day.types.length ? SC.border : 'none'}
+              strokeWidth={0.5}
+            />
+          )))}
+        </svg>
+        <div className="type-legend" style={{ marginTop: 8 }}>
+          {[['cycling','Cycling'],['weights','Weights'],['gym','Gym'],['other','Other']].map(([t,l]) => (
+            <div key={t} className="legend-item"><div className={`legend-dot ${t}`}/>{l}</div>
+          ))}
+          <div className="legend-item"><div style={{ width:8,height:8,borderRadius:'50%',background:'oklch(72% 0.04 55)',flexShrink:0 }}/>Mixed</div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── ReviewView ──────────────────────────────────────────────────── */
+  function ReviewView({ user }) {
+    const [period, setPeriod] = useState('week');
+    const [items,  setItems]  = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const getRange = (p) => {
+      const now = new Date();
+      const end = localDateStr(now);
+      if (p === 'week') {
+        const s = new Date(now); s.setDate(now.getDate() - 6);
+        return { start: localDateStr(s), end };
+      }
+      if (p === 'month') return { start: `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`, end };
+      return { start: `${now.getFullYear()}-01-01`, end };
+    };
+
+    useEffect(() => {
+      let cancelled = false;
+      (async () => {
+        setLoading(true);
+        const { start, end } = getRange(period);
+        const { data } = await sb.from('workouts').select('*').eq('user_id', user.id)
+          .gte('date', start).lte('date', end).order('date', { ascending: true });
+        if (!cancelled) { setItems(data || []); setLoading(false); }
+      })();
+      return () => { cancelled = true; };
+    }, [period, user.id]);
+
+    const byType = React.useMemo(() => {
+      const r = { cycling:{count:0,mins:0}, weights:{count:0,mins:0}, gym:{count:0,mins:0}, other:{count:0,mins:0} };
+      items.forEach(w => { r[w.type].count++; r[w.type].mins += Number((w.data||{}).duration)||0; });
+      return r;
+    }, [items]);
+
+    const dateMap = React.useMemo(() => {
+      const m = {};
+      items.forEach(w => { if (!m[w.date]) m[w.date] = []; if (!m[w.date].includes(w.type)) m[w.date].push(w.type); });
+      return m;
+    }, [items]);
+
+    const totalSessions = items.length;
+    const totalMins = Object.values(byType).reduce((s,v) => s + v.mins, 0);
+    const now = new Date();
+    const { start, end } = getRange(period);
+    const PERIODS = [{id:'week',label:'This week'},{id:'month',label:'This month'},{id:'year',label:'This year'}];
+
+    return (
+      <div>
+        <div className="date-main" style={{ marginBottom: 18 }}>Review</div>
+        <div className="period-tabs">
+          {PERIODS.map(p => (
+            <button key={p.id} className={`period-tab ${period===p.id?'active':''}`} onClick={() => setPeriod(p.id)}>{p.label}</button>
+          ))}
+        </div>
+        {loading ? <div className="loading">Loading…</div> : <>
+          <div className="stat-grid">
+            <div className="stat-card">
+              <div className="stat-val">{totalSessions}</div>
+              <div className="stat-label">{totalSessions===1?'session':'sessions'}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-val">{totalMins > 0 ? totalMins : '—'}</div>
+              <div className="stat-label">active minutes</div>
+            </div>
+          </div>
+          {['cycling','weights','gym','other'].map(t => {
+            const s = byType[t]; if (!s.count) return null;
+            const m = META[t];
+            return (
+              <div key={t} className={`type-stat ${t}`}>
+                <div className={`act-badge ${t}`} style={{ width:36,height:36,fontSize:17,borderRadius:9,flexShrink:0 }}>{m.emoji}</div>
+                <div className="type-stat-info">
+                  <div className="type-stat-name">{m.label}</div>
+                  <div className="type-stat-sub">{s.count} {s.count===1?'session':'sessions'}{s.mins>0?` · ${s.mins} min`:''}</div>
+                </div>
+                <div className="type-stat-count">{s.count}</div>
+              </div>
+            );
+          })}
+          <div style={{ marginTop: 22 }}>
+            <div className="section-label" style={{ marginBottom: 12 }}>Activity calendar</div>
+            {period === 'week' && <WeekCalendar startDate={new Date(start+'T00:00:00')} endDate={new Date(end+'T00:00:00')} dateMap={dateMap} />}
+            {period === 'month' && <MonthCalendar year={now.getFullYear()} month={now.getMonth()} dateMap={dateMap} />}
+            {period === 'year' && <YearHeatmap year={now.getFullYear()} dateMap={dateMap} />}
+          </div>
+        </>}
+      </div>
+    );
+  }
+
+  /* ── DonutChart ──────────────────────────────────────────────────── */
+  function DonutChart({ segments, size = 110 }) {
+    const total = segments.reduce((s, d) => s + d.value, 0);
+    if (!total) return null;
+    const cx = size/2, cy = size/2, R = size*0.42, r2 = size*0.26;
+    const toXY = (a, r) => [cx + r*Math.cos(a - Math.PI/2), cy + r*Math.sin(a - Math.PI/2)];
+    let angle = 0;
+    const paths = segments.filter(s => s.value > 0).map(s => {
+      const sweep = (s.value/total)*2*Math.PI;
+      const sa = angle, ea = angle + sweep - 0.01; angle += sweep;
+      const lg = sweep > Math.PI ? 1 : 0;
+      const [sx,sy] = toXY(sa,R); const [ex,ey] = toXY(ea,R);
+      const [six,siy] = toXY(sa,r2); const [eix,eiy] = toXY(ea,r2);
+      return { ...s, path: `M${sx} ${sy}A${R} ${R} 0 ${lg} 1 ${ex} ${ey}L${eix} ${eiy}A${r2} ${r2} 0 ${lg} 0 ${six} ${siy}Z` };
+    });
+    return (
+      <svg viewBox={`0 0 ${size} ${size}`} width={size} height={size}>
+        {paths.map((s,i) => <path key={i} d={s.path} fill={s.color} />)}
+      </svg>
+    );
+  }
+
+  /* ── StatsView ───────────────────────────────────────────────────── */
+  function StatsView({ user }) {
+    const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      (async () => {
+        const { data } = await sb.from('workouts').select('*').eq('user_id', user.id).order('date', { ascending: true });
+        setItems(data || []); setLoading(false);
+      })();
+    }, [user.id]);
+
+    const stats = React.useMemo(() => {
+      if (!items.length) return null;
+      const byType = { cycling:0, weights:0, gym:0, other:0 };
+      items.forEach(w => { if (byType[w.type]!==undefined) byType[w.type]++; });
+
+      /* weekly sessions (last 16 weeks) */
+      const wMap = {};
+      for (let i = 15; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i*7);
+        const key = getWeekMonday(localDateStr(d));
+        wMap[key] = { key, counts:{cycling:0,weights:0,gym:0,other:0}, total:0 };
+      }
+      items.forEach(w => {
+        const key = getWeekMonday(w.date);
+        if (wMap[key]) { wMap[key].counts[w.type]=(wMap[key].counts[w.type]||0)+1; wMap[key].total++; }
+      });
+      const weeklyData = Object.values(wMap).sort((a,b) => a.key.localeCompare(b.key));
+
+      /* top exercises */
+      const exC = {};
+      items.filter(w => w.type==='weights').forEach(w => {
+        ((w.data||{}).exercises||[]).forEach(e => { const n=toTitleCase(e.name||''); if(n) exC[n]=(exC[n]||0)+1; });
+      });
+      const topEx = Object.entries(exC).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([name,count])=>({name,count}));
+
+      /* streak */
+      const dateset = new Set(items.map(w => w.date));
+      let streak = 0;
+      const d0 = new Date();
+      let ds = localDateStr(d0);
+      if (!dateset.has(ds)) { d0.setDate(d0.getDate()-1); ds = localDateStr(d0); }
+      while (dateset.has(ds)) { streak++; d0.setDate(d0.getDate()-1); ds = localDateStr(d0); }
+
+      /* longest streak */
+      const allDates = [...dateset].sort();
+      let longest = 0, cur2 = 0, prev = null;
+      allDates.forEach(date => {
+        if (prev) {
+          const diff = (new Date(date+'T00:00:00') - new Date(prev+'T00:00:00')) / 86400000;
+          cur2 = diff === 1 ? cur2 + 1 : 1;
+        } else { cur2 = 1; }
+        if (cur2 > longest) longest = cur2;
+        prev = date;
+      });
+
+      const totalMins = items.reduce((s,w) => s + (Number((w.data||{}).duration)||0), 0);
+      const totalKm   = items.filter(w=>w.type==='cycling').reduce((s,w) => s + (Number((w.data||{}).distance)||0), 0);
+
+      return { byType, weeklyData, topEx, streak, longest, totalMins, totalKm };
+    }, [items]);
+
+    if (loading) return <div className="loading">Loading stats…</div>;
+    if (!stats) return (
+      <div className="empty"><div className="empty-icon">📊</div><h3>No data yet</h3><p>Start logging activities to see your stats here.</p></div>
+    );
+
+    const { byType, weeklyData, topEx, streak, longest, totalMins, totalKm } = stats;
+    const total = Object.values(byType).reduce((s,v)=>s+v,0);
+    const donutSegments = [
+      { label:'Cycling', value:byType.cycling, color:SC.cycling },
+      { label:'Weights', value:byType.weights, color:SC.weights },
+      { label:'Gym',     value:byType.gym,     color:SC.gym },
+      { label:'Other',   value:byType.other,   color:SC.other },
+    ];
+    const maxWeek = Math.max(...weeklyData.map(w=>w.total), 1);
+    const BAR_W = 14, BAR_GAP = 3, CHART_H = 90, LABEL_H = 16;
+    const svgW = weeklyData.length * (BAR_W + BAR_GAP);
+    const TYPE_ORDER = ['other','gym','cycling','weights'];
+
+    return (
+      <div>
+        <div className="date-main" style={{ marginBottom: 18 }}>Stats</div>
+
+        {/* Streaks */}
+        <div className="streak-grid">
+          <div className="streak-card">
+            <div className="streak-val">{streak}</div>
+            <div className="streak-unit">{streak===1?'day':'days'}</div>
+            <div className="streak-label">Current streak</div>
+          </div>
+          <div className="streak-card">
+            <div className="streak-val">{longest}</div>
+            <div className="streak-unit">{longest===1?'day':'days'}</div>
+            <div className="streak-label">Longest streak</div>
+          </div>
+        </div>
+
+        {/* All-time totals */}
+        <div className="stat-grid" style={{ marginBottom: 10 }}>
+          <div className="stat-card"><div className="stat-val">{total}</div><div className="stat-label">total sessions</div></div>
+          <div className="stat-card"><div className="stat-val">{totalMins > 0 ? totalMins : '—'}</div><div className="stat-label">active minutes</div></div>
+          {totalKm > 0 && <div className="stat-card"><div className="stat-val">{Math.round(totalKm * 10)/10}</div><div className="stat-label">km cycled</div></div>}
+        </div>
+
+        {/* Weekly sessions bar chart */}
+        <div className="chart-card">
+          <div className="chart-card-title">Sessions per week — last 16 weeks</div>
+          <div style={{ overflowX: 'auto' }}>
+            <svg width={svgW} height={CHART_H + LABEL_H} viewBox={`0 0 ${svgW} ${CHART_H + LABEL_H}`} style={{ display:'block', minWidth: svgW }}>
+              {weeklyData.map((wk, i) => {
+                const x = i * (BAR_W + BAR_GAP);
+                let yOff = CHART_H;
+                const rects = TYPE_ORDER.map(t => {
+                  const cnt = wk.counts[t] || 0;
+                  if (!cnt) return null;
+                  const bh = (cnt / maxWeek) * CHART_H;
+                  yOff -= bh;
+                  return <rect key={t} x={x} y={yOff} width={BAR_W} height={bh} fill={SC[t]} rx={t===TYPE_ORDER[TYPE_ORDER.findIndex(t2=>wk.counts[t2]>0)]?2:0} />;
+                });
+                const showLabel = i === 0 || i % 4 === 3 || i === weeklyData.length - 1;
+                const wd = new Date(wk.key + 'T00:00:00');
+                return (
+                  <g key={wk.key}>
+                    {rects}
+                    {showLabel && <text x={x + BAR_W/2} y={CHART_H + LABEL_H - 2} textAnchor="middle" fontSize={7} fill={SC.muted}>{`${wd.getDate()}/${wd.getMonth()+1}`}</text>}
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+          <div className="type-legend">
+            {donutSegments.filter(s=>s.value>0).map(s => (
+              <div key={s.label} className="legend-item">
+                <div style={{ width:8,height:8,borderRadius:'50%',background:s.color,flexShrink:0 }} />{s.label}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Activity breakdown donut */}
+        <div className="chart-card">
+          <div className="chart-card-title">Activity breakdown</div>
+          <div style={{ display:'flex', alignItems:'center', gap:20 }}>
+            <DonutChart segments={donutSegments} size={110} />
+            <div style={{ flex:1 }}>
+              {donutSegments.filter(s=>s.value>0).map(s => (
+                <div key={s.label} style={{ display:'flex', alignItems:'center', gap:8, marginBottom:7 }}>
+                  <div style={{ width:8,height:8,borderRadius:'50%',background:s.color,flexShrink:0 }} />
+                  <div style={{ flex:1, fontSize:13, fontWeight:500 }}>{s.label}</div>
+                  <div style={{ fontSize:13, color:'var(--text-muted)' }}>{s.value}</div>
+                  <div style={{ fontSize:12, color:'var(--text-subtle)' }}>({Math.round(s.value/total*100)}%)</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Top exercises */}
+        {topEx.length > 0 && (
+          <div className="chart-card">
+            <div className="chart-card-title">Top exercises</div>
+            <div>
+              {topEx.map((e, i) => (
+                <div key={e.name} className="ex-rank-item">
+                  <div className="ex-rank-n">{i+1}</div>
+                  <div className="ex-rank-name">{e.name}</div>
+                  <div className="ex-rank-bar"><div className="ex-rank-fill" style={{ width: `${(e.count/topEx[0].count)*100}%` }} /></div>
+                  <div className="ex-rank-cnt">{e.count}×</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   /* ── Forms ───────────────────────────────────────────────────────────── */
   function CyclingForm({ val, set }) {
@@ -1506,6 +2025,12 @@
             <button className={`sb-tab ${view === 'history' ? 'active' : ''}`} onClick={() => setView('history')}>
               <IHistory /><span>History</span>
             </button>
+            <button className={`sb-tab ${view === 'review' ? 'active' : ''}`} onClick={() => setView('review')}>
+              <IReview /><span>Review</span>
+            </button>
+            <button className={`sb-tab ${view === 'stats' ? 'active' : ''}`} onClick={() => setView('stats')}>
+              <IBarChart /><span>Stats</span>
+            </button>
           </nav>
 
           {view === 'log' && (
@@ -1532,6 +2057,8 @@
         <div className="content">
           {view === 'log'     && <DayView     user={user} showAdd={showAdd} setShowAdd={setShowAdd} />}
           {view === 'history' && <HistoryView user={user} />}
+          {view === 'review'  && <ReviewView  user={user} />}
+          {view === 'stats'   && <StatsView   user={user} />}
         </div>
 
         {/* ── Mobile bottom nav ── */}
@@ -1541,6 +2068,12 @@
           </button>
           <button className={`nav-tab ${view === 'history' ? 'active' : ''}`} onClick={() => setView('history')}>
             <IHistory /><span>History</span>
+          </button>
+          <button className={`nav-tab ${view === 'review' ? 'active' : ''}`} onClick={() => setView('review')}>
+            <IReview /><span>Review</span>
+          </button>
+          <button className={`nav-tab ${view === 'stats' ? 'active' : ''}`} onClick={() => setView('stats')}>
+            <IBarChart /><span>Stats</span>
           </button>
         </nav>
 
