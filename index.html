@@ -723,6 +723,10 @@
     .legend-dot.weights { background: var(--accent); }
     .legend-dot.gym     { background: var(--indigo); }
     .legend-dot.other   { background: var(--amber); }
+
+    /* ── Day strip ─────────────────────────────────────────────────── */
+    .day-strip { display: flex; overflow-x: auto; gap: 2px; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin-bottom: 16px; }
+    .day-strip::-webkit-scrollbar { display: none; }
   </style>
 </head>
 <body>
@@ -1042,6 +1046,45 @@
     );
   }
 
+  /* ── DayStrip ───────────────────────────────────────────────────── */
+  function DayStrip({ selectedDate, onSelect }) {
+    const selRef = useRef(null);
+    const today = localDateStr(new Date());
+    const DAY = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+    const days = [];
+    const base = new Date();
+    for (let i = 89; i >= 0; i--) {
+      const d = new Date(base); d.setDate(base.getDate() - i); days.push(d);
+    }
+    useEffect(() => {
+      if (selRef.current) selRef.current.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'center' });
+    }, [selectedDate]);
+    return (
+      <div className="day-strip">
+        {days.map(day => {
+          const ds = localDateStr(day);
+          const isSel = ds === selectedDate;
+          const isToday = ds === today;
+          return (
+            <button key={ds} ref={isSel ? selRef : null} onClick={() => onSelect(ds)} style={{
+              flexShrink: 0, width: 40, padding: '7px 0 6px',
+              background: isSel ? 'var(--accent)' : 'transparent',
+              border: 'none', borderRadius: 10, cursor: 'pointer', textAlign: 'center', transition: 'background .15s',
+            }}>
+              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase', color: isSel ? 'rgba(255,255,255,.7)' : 'var(--text-subtle)', marginBottom: 4 }}>
+                {DAY[day.getDay()]}
+              </div>
+              <div style={{ fontSize: 15, fontWeight: isSel || isToday ? 700 : 400, color: isSel ? 'white' : isToday ? 'var(--accent)' : 'var(--text)', lineHeight: 1 }}>
+                {day.getDate()}
+              </div>
+              {isToday && !isSel && <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--accent)', margin: '3px auto 0' }} />}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
   /* ── ReviewView ──────────────────────────────────────────────────── */
   function ReviewView({ user }) {
     const [period,  setPeriod]  = useState('week');
@@ -1112,29 +1155,30 @@
           ))}
         </div>
 
-        {/* Day picker — only shown in day mode */}
-        {period === 'day' && (
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16, gap:10 }}>
-            <div>
-              <div style={{ fontSize:17, fontWeight:600, letterSpacing:'-.3px' }}>{fmtDate(dayDate)}</div>
-              {dayDate !== localDateStr(new Date()) && <div style={{ fontSize:12, color:'var(--text-muted)', marginTop:1 }}>{fmtShort(dayDate)}</div>}
-            </div>
-            <input type="date" className="date-input" value={dayDate} max={localDateStr(new Date())}
-              onChange={e => e.target.value && setDayDate(e.target.value)} />
-          </div>
-        )}
+        {/* Day strip — only shown in day mode */}
+        {period === 'day' && <DayStrip selectedDate={dayDate} onSelect={setDayDate} />}
 
         {loading ? <div className="loading">Loading…</div> : <>
 
           {/* Day mode: show activities list */}
           {period === 'day' ? (
             totalSessions === 0 ? (
-              <div className="empty">
-                <div className="empty-icon">🌿</div>
-                <h3>No activities</h3>
-                <p>Nothing logged on this day.</p>
-              </div>
+              <>
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.3px' }}>{fmtDate(dayDate)}</div>
+                  {dayDate !== localDateStr(new Date()) && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{fmtShort(dayDate)}</div>}
+                </div>
+                <div className="empty">
+                  <div className="empty-icon">🌿</div>
+                  <h3>No activities</h3>
+                  <p>Nothing logged on this day.</p>
+                </div>
+              </>
             ) : <>
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.3px' }}>{fmtDate(dayDate)}</div>
+                {dayDate !== localDateStr(new Date()) && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{fmtShort(dayDate)}</div>}
+              </div>
               <div className="stat-grid" style={{ marginBottom: 14 }}>
                 <div className="stat-card">
                   <div className="stat-val">{totalSessions}</div>
