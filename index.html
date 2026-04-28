@@ -1044,7 +1044,7 @@
 
   /* ── ReviewView ──────────────────────────────────────────────────── */
   function ReviewView({ user }) {
-    const [period,  setPeriod]  = useState('day');
+    const [period,  setPeriod]  = useState('week');
     const [dayDate, setDayDate] = useState(localDateStr(new Date()));
     const [items,   setItems]   = useState([]);
     const [loading, setLoading] = useState(true);
