@@ -765,7 +765,7 @@
   const META = {
     cycling: { label: 'Cycling',   emoji: '🚴', cls: 'cycling' },
     weights: { label: 'Weights',   emoji: '🏋️', cls: 'weights' },
-    gym:     { label: 'Gym cardio',emoji: '🏃', cls: 'gym'     },
+    gym:     { label: 'Gym',        emoji: '🏃', cls: 'gym'     },
     other:   { label: 'Other',     emoji: '✨', cls: 'other'   },
   };
 
@@ -783,7 +783,7 @@
     }
     if (type === 'gym') {
       const ps = [data.machine, data.duration && `${data.duration} min`].filter(Boolean);
-      return ps.join(' · ') || 'Gym cardio';
+      return ps.join(' · ') || 'Gym session';
     }
     if (type === 'other') return data.name || 'Activity';
     return '';
@@ -1044,17 +1044,16 @@
 
   /* ── ReviewView ──────────────────────────────────────────────────── */
   function ReviewView({ user }) {
-    const [period, setPeriod] = useState('week');
-    const [items,  setItems]  = useState([]);
+    const [period,  setPeriod]  = useState('day');
+    const [dayDate, setDayDate] = useState(localDateStr(new Date()));
+    const [items,   setItems]   = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const getRange = (p) => {
+    const getRange = (p, dd) => {
       const now = new Date();
       const end = localDateStr(now);
-      if (p === 'week') {
-        const s = new Date(now); s.setDate(now.getDate() - 6);
-        return { start: localDateStr(s), end };
-      }
+      if (p === 'day')   return { start: dd, end: dd };
+      if (p === 'week')  { const s = new Date(now); s.setDate(now.getDate() - 6); return { start: localDateStr(s), end }; }
       if (p === 'month') return { start: `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`, end };
       return { start: `${now.getFullYear()}-01-01`, end };
     };
@@ -1063,13 +1062,13 @@
       let cancelled = false;
       (async () => {
         setLoading(true);
-        const { start, end } = getRange(period);
+        const { start, end } = getRange(period, dayDate);
         const { data } = await sb.from('workouts').select('*').eq('user_id', user.id)
           .gte('date', start).lte('date', end).order('date', { ascending: true });
         if (!cancelled) { setItems(data || []); setLoading(false); }
       })();
       return () => { cancelled = true; };
-    }, [period, user.id]);
+    }, [period, dayDate, user.id]);
 
     const byType = React.useMemo(() => {
       const r = { cycling:{count:0,mins:0}, weights:{count:0,mins:0}, gym:{count:0,mins:0}, other:{count:0,mins:0} };
@@ -1086,8 +1085,23 @@
     const totalSessions = items.length;
     const totalMins = Object.values(byType).reduce((s,v) => s + v.mins, 0);
     const now = new Date();
-    const { start, end } = getRange(period);
-    const PERIODS = [{id:'week',label:'This week'},{id:'month',label:'This month'},{id:'year',label:'This year'}];
+    const { start, end } = getRange(period, dayDate);
+    const PERIODS = [{id:'day',label:'Day'},{id:'week',label:'Week'},{id:'month',label:'Month'},{id:'year',label:'Year'}];
+
+    const TypeBreakdown = () => ['cycling','weights','gym','other'].map(t => {
+      const s = byType[t]; if (!s.count) return null;
+      const m = META[t];
+      return (
+        <div key={t} className={`type-stat ${t}`}>
+          <div className={`act-badge ${t}`} style={{ width:36,height:36,fontSize:17,borderRadius:9,flexShrink:0 }}>{m.emoji}</div>
+          <div className="type-stat-info">
+            <div className="type-stat-name">{m.label}</div>
+            <div className="type-stat-sub">{s.count} {s.count===1?'session':'sessions'}{s.mins>0?` · ${s.mins} min`:''}</div>
+          </div>
+          <div className="type-stat-count">{s.count}</div>
+        </div>
+      );
+    });
 
     return (
       <div>
@@ -1097,37 +1111,79 @@
             <button key={p.id} className={`period-tab ${period===p.id?'active':''}`} onClick={() => setPeriod(p.id)}>{p.label}</button>
           ))}
         </div>
+
+        {/* Day picker — only shown in day mode */}
+        {period === 'day' && (
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16, gap:10 }}>
+            <div>
+              <div style={{ fontSize:17, fontWeight:600, letterSpacing:'-.3px' }}>{fmtDate(dayDate)}</div>
+              {dayDate !== localDateStr(new Date()) && <div style={{ fontSize:12, color:'var(--text-muted)', marginTop:1 }}>{fmtShort(dayDate)}</div>}
+            </div>
+            <input type="date" className="date-input" value={dayDate} max={localDateStr(new Date())}
+              onChange={e => e.target.value && setDayDate(e.target.value)} />
+          </div>
+        )}
+
         {loading ? <div className="loading">Loading…</div> : <>
-          <div className="stat-grid">
-            <div className="stat-card">
-              <div className="stat-val">{totalSessions}</div>
-              <div className="stat-label">{totalSessions===1?'session':'sessions'}</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-val">{totalMins > 0 ? totalMins : '—'}</div>
-              <div className="stat-label">active minutes</div>
-            </div>
-          </div>
-          {['cycling','weights','gym','other'].map(t => {
-            const s = byType[t]; if (!s.count) return null;
-            const m = META[t];
-            return (
-              <div key={t} className={`type-stat ${t}`}>
-                <div className={`act-badge ${t}`} style={{ width:36,height:36,fontSize:17,borderRadius:9,flexShrink:0 }}>{m.emoji}</div>
-                <div className="type-stat-info">
-                  <div className="type-stat-name">{m.label}</div>
-                  <div className="type-stat-sub">{s.count} {s.count===1?'session':'sessions'}{s.mins>0?` · ${s.mins} min`:''}</div>
-                </div>
-                <div className="type-stat-count">{s.count}</div>
+
+          {/* Day mode: show activities list */}
+          {period === 'day' ? (
+            totalSessions === 0 ? (
+              <div className="empty">
+                <div className="empty-icon">🌿</div>
+                <h3>No activities</h3>
+                <p>Nothing logged on this day.</p>
               </div>
-            );
-          })}
-          <div style={{ marginTop: 22 }}>
-            <div className="section-label" style={{ marginBottom: 12 }}>Activity calendar</div>
-            {period === 'week' && <WeekCalendar startDate={new Date(start+'T00:00:00')} endDate={new Date(end+'T00:00:00')} dateMap={dateMap} />}
-            {period === 'month' && <MonthCalendar year={now.getFullYear()} month={now.getMonth()} dateMap={dateMap} />}
-            {period === 'year' && <YearHeatmap year={now.getFullYear()} dateMap={dateMap} />}
-          </div>
+            ) : <>
+              <div className="stat-grid" style={{ marginBottom: 14 }}>
+                <div className="stat-card">
+                  <div className="stat-val">{totalSessions}</div>
+                  <div className="stat-label">{totalSessions===1?'session':'sessions'}</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-val">{totalMins > 0 ? totalMins : '—'}</div>
+                  <div className="stat-label">active minutes</div>
+                </div>
+              </div>
+              <TypeBreakdown />
+              <div style={{ marginTop: 18 }}>
+                <div className="section-label" style={{ marginBottom: 10 }}>Activities</div>
+                {items.map(w => {
+                  const meta = META[w.type];
+                  const det = getDetail(w.type, w.data);
+                  return (
+                    <div key={w.id} className="act-card">
+                      <div className={`act-badge ${meta.cls}`}>{meta.emoji}</div>
+                      <div className="act-body">
+                        <div className="act-type">{meta.label}</div>
+                        <div className="act-summary">{summarize(w.type, w.data)}</div>
+                        {det && <div className="act-detail">{det}</div>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          ) : <>
+            {/* Week/Month/Year mode: summary + calendar */}
+            <div className="stat-grid">
+              <div className="stat-card">
+                <div className="stat-val">{totalSessions}</div>
+                <div className="stat-label">{totalSessions===1?'session':'sessions'}</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-val">{totalMins > 0 ? totalMins : '—'}</div>
+                <div className="stat-label">active minutes</div>
+              </div>
+            </div>
+            <TypeBreakdown />
+            <div style={{ marginTop: 22 }}>
+              <div className="section-label" style={{ marginBottom: 12 }}>Activity calendar</div>
+              {period === 'week'  && <WeekCalendar startDate={new Date(start+'T00:00:00')} endDate={new Date(end+'T00:00:00')} dateMap={dateMap} />}
+              {period === 'month' && <MonthCalendar year={now.getFullYear()} month={now.getMonth()} dateMap={dateMap} />}
+              {period === 'year'  && <YearHeatmap year={now.getFullYear()} dateMap={dateMap} />}
+            </div>
+          </>}
         </>}
       </div>
     );
@@ -1740,7 +1796,7 @@
           }
         }
       }
-      if (type === 'gym' && !form.duration) return 'Duration is required for gym cardio.';
+      if (type === 'gym' && !form.duration) return 'Duration is required for gym.';
       if (type === 'other' && !form.name?.trim()) return 'Activity name is required.';
       return null;
     };
@@ -1772,7 +1828,7 @@
     const TYPES = [
       { id: 'cycling', label: 'Cycling',    emoji: '🚴' },
       { id: 'weights', label: 'Weights',    emoji: '🏋️' },
-      { id: 'gym',     label: 'Gym cardio', emoji: '🏃' },
+      { id: 'gym',     label: 'Gym',        emoji: '🏃' },
       { id: 'other',   label: 'Other',      emoji: '✨' },
     ];
 
